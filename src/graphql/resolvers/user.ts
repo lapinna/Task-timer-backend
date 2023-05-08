@@ -35,7 +35,7 @@ const resolvers = {
 
       const res = await newUser.save();
 
-      return res._id;
+      return res;
     },
   },
 };
