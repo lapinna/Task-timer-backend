@@ -37,6 +37,31 @@ const resolvers = {
 
       return res;
     },
+
+    
+    async login(_, { input: { email, password } }) {
+      const user = await User.findOne({ email });
+      if (!user) {
+        throw new GraphQLError("User does not exist");
+      }
+
+      const isPasswordEqual = await bcrypt.compare(
+        password,
+        user.password as string
+      );
+      if (!isPasswordEqual) {
+        throw new GraphQLError("Incorrect password");
+      }
+
+      const token = jwt.sign(
+        { userId: user._id, email: user.email },
+        "UNSAFE_STRING",
+        {
+          expiresIn: "1h",
+        }
+      );
+      return { user: user, token: token, tokenExpire: 1 };
+    },
   },
 };
 

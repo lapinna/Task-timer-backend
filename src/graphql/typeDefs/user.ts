@@ -8,6 +8,12 @@ const typeDefs = `#graphql
     tasks: [Task]
   }
 
+  type AuthData {
+    user: User!
+    token: String!
+    tokenExpire: Int!
+  }
+
   input RegisterInput {
     username: String!
     email: String!
@@ -32,7 +38,7 @@ const typeDefs = `#graphql
 
   type Mutation {
     registerUser(input: RegisterInput!): User!
-    loginUser(input: LoginInput!): User!
+    login(input: LoginInput!): AuthData!
   }
 `;
 
