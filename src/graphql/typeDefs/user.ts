@@ -5,6 +5,7 @@ const typeDefs = `#graphql
     username: String!
     email: String!
     password: String!
+    confirmPassword: String
     tasks: [Task]
   }
 
@@ -12,17 +13,6 @@ const typeDefs = `#graphql
     user: User!
     token: String!
     tokenExpire: Int!
-  }
-
-  input RegisterInput {
-    username: String!
-    email: String!
-    password: String!
-  }
-
-  input LoginInput {
-    email: String!
-    password: String!
   }
 
   type Task {
@@ -37,8 +27,8 @@ const typeDefs = `#graphql
   }
 
   type Mutation {
-    registerUser(input: RegisterInput!): User!
-    login(input: LoginInput!): AuthData!
+    registerUser(username: String!,  email: String!, password: String!): User!
+    loginUser(email: String!, password: String!): AuthData!
   }
 `;
 

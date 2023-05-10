@@ -11,7 +11,7 @@ const resolvers = {
   },
 
   Mutation: {
-    async registerUser(_, { input: { username, email, password } }) {
+    async registerUser(_, { username, email, password }) {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         throw new GraphQLError(
@@ -27,9 +27,13 @@ const resolvers = {
         password: encryptedPassword,
       });
 
-      const token = jwt.sign({ user_id: newUser._id, email }, "UNSAFE_STRING", {
-        expiresIn: "12h",
-      });
+      const token = jwt.sign(
+        { user_id: newUser._id, email },
+        process.env.TOKEN_KEY,
+        {
+          expiresIn: "12h",
+        }
+      );
 
       newUser.token = token;
 
@@ -38,8 +42,7 @@ const resolvers = {
       return res;
     },
 
-    
-    async login(_, { input: { email, password } }) {
+    async loginUser(_, { email, password }) {
       const user = await User.findOne({ email });
       if (!user) {
         throw new GraphQLError("User does not exist");
@@ -55,7 +58,7 @@ const resolvers = {
 
       const token = jwt.sign(
         { userId: user._id, email: user.email },
-        "UNSAFE_STRING",
+        process.env.TOKEN_KEY,
         {
           expiresIn: "1h",
         }
