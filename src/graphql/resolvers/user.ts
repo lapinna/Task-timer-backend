@@ -2,11 +2,15 @@ import { GraphQLError } from "graphql";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../../models/user.js";
+import { isAuth } from "../../middleware/isAuth.js";
 
 const resolvers = {
   Query: {
-    async users(_, args) {
-      return await User.find(args);
+    async currentUser(_, { user }) {
+      if (!isAuth) {
+        throw new GraphQLError("Not authenticated!");
+      }
+      return user;
     },
   },
 
@@ -63,7 +67,7 @@ const resolvers = {
           expiresIn: "1h",
         }
       );
-      return { user: user, token: token, tokenExpire: 1 };
+      return { user: user, token: token };
     },
   },
 };

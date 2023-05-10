@@ -12,7 +12,6 @@ const typeDefs = `#graphql
   type AuthData {
     user: User!
     token: String!
-    tokenExpire: Int!
   }
 
   type Task {
@@ -22,8 +21,7 @@ const typeDefs = `#graphql
   }
 
   type Query {
-    users: [User!]
-    user(_id: String!): User!
+    currentUser: User!
   }
 
   type Mutation {
