@@ -16,12 +16,15 @@ const typeDefs = `#graphql
   }
 
   type Query {
-    currentUser: User!
+    getTasks: [Task]
+    getTask(taskId: String!): Task
   }
 
   type Mutation {
     registerUser(username: String!,  email: String!, password: String!): User!
     loginUser(email: String!, password: String!): User!
+    createTask(userId: String!, title: String!): Task!
+    deleteTask(taskId: String!): String!
   }
 `;
 

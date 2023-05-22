@@ -6,6 +6,7 @@ interface IUser {
   email: String;
   password: String;
   token: String;
+  tasks: String[];
 }
 
 const userSchema = new Schema<IUser>({
@@ -13,6 +14,7 @@ const userSchema = new Schema<IUser>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   token: { type: String },
+  tasks: {},
 });
 
 const User = model<IUser>("users", userSchema);
