@@ -1,32 +1,27 @@
 import jwt from "jsonwebtoken";
+import { GraphQLError } from "graphql";
 
-export const isAuth = (req, res, next) => {
-  const authHeader = req.get("Authorization");
-  if (!authHeader) {
-    req.isAuth = false;
-    return next();
+interface JwtPayload {
+  id: string;
+  email: string;
+  username: string;
+}
+
+export const isAuth = (context) => {
+  const authHeader = context.req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split("Bearer ")[1];
+    if (token) {
+      try {
+        const user = jwt.verify(token, process.env.TOKEN_KEY) as JwtPayload;
+        return user;
+      } catch (error) {
+        throw new GraphQLError("Invalid/Expired token");
+      }
+    } else {
+      throw new GraphQLError("Authentication token must be  'Bearer [token] ");
+    }
+  } else {
+    throw new GraphQLError("Authorization header must be provided");
   }
-
-  const token = authHeader.split(" ")[1];
-  if(!token || token === "") {
-    req.isAuth = false;
-    return next();
-  }
-
-  let decodedToken;
-  try {
-    decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
-  } catch (error) {
-    req.isAuth = false;
-    return next();
-  }
-
-  if(!decodedToken) {
-    req.isAuth = false;
-    return next();
-  }
-
-  req.isAuth = true;
-  req.userId = decodedToken.userId;
-  next();
 };

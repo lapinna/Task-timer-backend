@@ -2,7 +2,6 @@ import { GraphQLError } from "graphql";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../../models/user.js";
-import { isAuth } from "../../middleware/isAuth.js";
 
 function generateToken(user) {
   return jwt.sign(
@@ -19,15 +18,7 @@ function generateToken(user) {
 }
 
 const resolvers = {
-  Query: {
-    async currentUser(_, { email }) {
-      const user = await User.findOne({ email });
-      if (!isAuth) {
-        throw new GraphQLError("Not authenticated!");
-      }
-      return user;
-    },
-  },
+  Query: {},
 
   Mutation: {
     async registerUser(_, { username, email, password }) {

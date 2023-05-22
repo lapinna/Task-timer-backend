@@ -22,6 +22,12 @@ await connect(process.env.MONGO_URI)
 
 const { url } = await startStandaloneServer(server, {
   listen: { port: 4000 },
+  context: async ({ req }) => ({
+    req,
+      headers: {
+        ...req.headers,
+      },
+  })
 });
 
 console.log(`🚀  Server ready at: ${url}`);
