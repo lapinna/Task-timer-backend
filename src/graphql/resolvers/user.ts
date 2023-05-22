@@ -4,9 +4,24 @@ import jwt from "jsonwebtoken";
 import User from "../../models/user.js";
 import { isAuth } from "../../middleware/isAuth.js";
 
+function generateToken(user) {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    },
+    process.env.TOKEN_KEY,
+    {
+      expiresIn: "1h",
+    }
+  );
+}
+
 const resolvers = {
   Query: {
-    async currentUser(_, { user }) {
+    async currentUser(_, { email }) {
+      const user = await User.findOne({ email });
       if (!isAuth) {
         throw new GraphQLError("Not authenticated!");
       }
@@ -31,17 +46,10 @@ const resolvers = {
         password: encryptedPassword,
       });
 
-      const token = jwt.sign(
-        { user_id: newUser._id, email },
-        process.env.TOKEN_KEY,
-        {
-          expiresIn: "12h",
-        }
-      );
-
-      newUser.token = token;
-
       const res = await newUser.save();
+
+      const token = generateToken(res);
+      newUser.token = token;
 
       return res;
     },
@@ -60,14 +68,10 @@ const resolvers = {
         throw new GraphQLError("Incorrect password");
       }
 
-      const token = jwt.sign(
-        { userId: user._id, email: user.email },
-        process.env.TOKEN_KEY,
-        {
-          expiresIn: "1h",
-        }
-      );
-      return { user: user, token: token };
+      const token = generateToken(user);
+      user.token = token;
+
+      return user;
     },
   },
 };
