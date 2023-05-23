@@ -10,21 +10,23 @@ const typeDefs = `#graphql
   }
 
   type Task {
-    id: String!
-    title: String!
+    id: String
+    title: String
+    author: String
     timeSpent: Int
+    createdAt: String
   }
 
   type Query {
-    getTasks: [Task]
-    getTask(taskId: String!): Task
+    getTasks(userId: String!): [Task]
+    getTask(userId: String!, taskId: String!): Task
   }
 
   type Mutation {
     registerUser(username: String!,  email: String!, password: String!): User!
     loginUser(email: String!, password: String!): User!
-    createTask(userId: String!, title: String!): Task!
-    deleteTask(taskId: String!): String!
+    createTask(userId: String!, title: String!): User!
+    deleteTask(userId: String!, taskId: String!): String!
   }
 `;
 

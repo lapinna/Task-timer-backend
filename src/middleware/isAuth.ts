@@ -2,9 +2,12 @@ import jwt from "jsonwebtoken";
 import { GraphQLError } from "graphql";
 
 interface JwtPayload {
-  id: string;
-  email: string;
+  _id: string;
   username: string;
+  email: string;
+  password: string;
+  token: string;
+  tasks: [];
 }
 
 export const isAuth = (context) => {

@@ -1,12 +1,20 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
 interface IUser {
-  id?: String;
+  id: String;
   username: String;
   email: String;
   password: String;
   token: String;
-  tasks: String[];
+  tasks: Types.DocumentArray<ITask>;
+}
+
+interface ITask {
+  id: Types.ObjectId;
+  title: string;
+  author: string;
+  timeSpent: number;
+  createdAt: string;
 }
 
 const userSchema = new Schema<IUser>({
@@ -14,7 +22,12 @@ const userSchema = new Schema<IUser>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   token: { type: String },
-  tasks: {},
+  tasks: [{
+      title: { type: String },
+      author: { type: String },
+      timeSpent: { type: Number },
+      createdAt: { type: String },
+    }],
 });
 
 const User = model<IUser>("users", userSchema);

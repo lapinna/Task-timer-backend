@@ -1,25 +1,38 @@
 import { GraphQLError } from "graphql";
-import Task from "../../models/task.js";
 import User from "../../models/user.js";
 import { isAuth } from "../../middleware/isAuth.js";
 
 const resolvers = {
   Query: {
-    async getTasks(_, __, context) {
+    async getTasks(_, { userId }) {
       try {
-        const tasks = await Task.find();
-        return tasks;
+        const userDb = await User.findById(userId);
+        if (userDb) {
+          const tasks = userDb.tasks;
+          if (tasks === null) {
+            throw new GraphQLError("Tasks does not exist");
+          } else {
+            return tasks;
+          }
+        } else {
+          throw new GraphQLError("User not found");
+        }
       } catch (error) {
         throw new GraphQLError(error);
       }
     },
-    async getTask(_, { taskId }) {
+    async getTask(_, { userId, taskId }) {
       try {
-        const task = await Task.findById(taskId);
-        if (task) {
-          return task;
+        const userDb = await User.findById(userId);
+        if (userDb) {
+          const task = userDb.tasks.find((task) => task.id === taskId);
+          if (task) {
+            return task;
+          } else {
+            throw new GraphQLError("Task does not exist");
+          }
         } else {
-          throw new GraphQLError("Task not found");
+          throw new GraphQLError("User not found");
         }
       } catch (error) {
         throw new GraphQLError(error);
@@ -29,39 +42,41 @@ const resolvers = {
 
   Mutation: {
     async createTask(_, { userId, title }, context) {
-      const { username } = isAuth(context);
+      const user = isAuth(context);
       if (title.trim() === "") {
         throw new GraphQLError("Empty task");
-        // const newTask = new Task({
-        //   title,
-        // });
-        // const task = newTask.save();
-        // return task;
       }
-      const user = await User.findById(userId);
-      if (user) {
-        const newTask = new Task({
-            title,
-            username,
-          });
-        const taskArray = user.tasks = [];
-        taskArray.unshift(newTask);
-
-        await user.save();
-        return user;
-      } 
+      const userDb = await User.findById(userId);
+      if (userDb) {
+        const newTask = {
+          title,
+          author: user.username,
+          createdAt: new Date().toISOString(),
+        };
+        userDb.tasks.unshift(newTask);
+        await userDb.save();
+        return userDb;
+      } else {
+        throw new GraphQLError("User not found");
+      }
     },
 
-    async deleteTask(_, { taskId }, context) {
+    async deleteTask(_, { userId, taskId }, context) {
       const user = isAuth(context);
-      try {
-        if (user) {
-          const task = await Task.findById(taskId);
-          await task.deleteOne();
-          return "Task deleted successfully!";
+      if (user) {
+        try {
+          const userDb = await User.findById(userId);
+          if (userDb) {
+            const taskIndex = userDb.tasks.findIndex(
+              (task) => task.id === taskId
+            );
+            userDb.tasks.splice(taskIndex, 1);
+            await userDb.save();
+            return "Task successfully deleted!";
+          }
+        } catch (error) {
+          throw new GraphQLError(error);
         }
-      } catch (error) {
-        throw new GraphQLError(error);
       }
     },
   },
